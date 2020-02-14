@@ -1,0 +1,92 @@
+	.text
+	.globl main
+main:
+	la $a0,ans
+	li $v0,4
+	syscall
+
+	li $v0,8
+	la $a0, string		#load byte space into address
+        lw $a1, size 		# allot the byte space for string
+        syscall
+
+	move $t1,$a0 		#save string to t1
+	
+
+for:	lb $t0,($t1)		#t0=first char of string
+	beqz $t0,exit
+
+	li $t2,97		#t2='a'
+	li $t3,0		#when t2 show 'a' t3 show 0(position of p array)...
+for1:	
+	bne $t0,$t2,exit1	#first char not equal to first letter 'a'	
+	lw $t4,p($t3)		#load the element of p which is $t3 position
+	addi $t4,$t4,1		#this element = element + 1
+	sw $t4,p($t3)		#store element back to array
+
+	
+
+exit1:
+	addi $t2,$t2,1	
+	addi $t3,$t3,4	
+	beq $t2,123,skip
+	j for1
+
+skip:
+	addi $t1,$t1,1 	  #next char position
+	j for
+exit:	
+	li $t0,0
+	li $t1,26
+	li $t2,0
+	li $t3,97
+
+	la $a0,ans1
+	li $v0,4
+	syscall
+
+	la $a0,string
+	li $v0,4
+	syscall
+
+	la $a0,ans2
+	li $v0,4
+	syscall
+again:		
+	bge $t2,$t1,exit2
+	
+	add $a0,$t3,$t2
+	li $v0,11
+	syscall
+
+	la $a0,prompt
+	li $v0,4
+	syscall
+	
+	lw $a0,p($t0)
+	
+	li $v0,1
+	syscall
+
+	la $a0,line
+	li $v0,4
+	syscall
+
+	addi $t0,$t0,4
+	addi $t2,$t2,1
+	j again
+exit2:
+	li $v0,10
+	syscall
+
+
+	.data
+ans:	.asciiz "Give the string of which you want to calculate the frequency:\n"
+ans1:	.asciiz "The string of which you want to calculate frequency is:\n"
+ans2:	.asciiz "The array of frequencies is:\n"
+repeat: .asciiz "If you want to stop press 0 or press something else to continue"
+string:	.space 128
+size:	.word 128
+p:	.word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+line:	.asciiz "\n"
+prompt: .asciiz ": "

@@ -1,0 +1,134 @@
+# Surname: Tsouvelekakis	Name: Panagiotis	Number:p3130212
+	.text
+	.globl main
+main:
+	la $a0, prompt			#print string
+	li $v0, 4			#"Enter number of objects in the set (n): "
+	syscall				#to console
+
+	li $v0, 5			#read an intiger n
+	syscall
+
+	move $a1, $v0			#$a1 = $v0 ($v0 contains n)
+
+	la $a0, prompt1			#print string
+	li $v0, 4			#"Enter number to be chosen (k): "
+	syscall				#to console
+
+	li $v0, 5			#read an intiger k
+	syscall
+	
+	move $a2, $v0			#$a2 = $v0 ($v0 contains k)
+
+	blt $a1, $a2, else		#if(n<k) go to else
+	bltz $a2, else			#if(k<0) go to else
+					#so the code below will execute only with n>=k && k>=0
+	la $a0, prompt3			#print string
+	li $v0, 4			#"C("
+	syscall				#to console
+
+	move $a0, $a1			#$a0 = $a1 ($a1 contains n)
+	li $v0, 1			#print n
+	syscall				#to console
+
+	la $a0, prompt4			#print string
+	li $v0, 4			#" , "
+	syscall				#to console
+
+	move $a0, $a2			#$a0 = $a2 ($a2 contains k)
+	li $v0, 1			#print k
+	syscall				#to console
+
+	la $a0, prompt5			#print string
+	li $v0, 4			#") = "
+	syscall				#to console
+	
+	jal combination			#jump to combination label
+	move $a0, $v0			#$a0 = $v0(move the result to $t0)
+
+	li $v0, 1			#print result
+	syscall				#to console
+	j do				#jump to do label
+
+else:	la $a0, prompt2			#print string
+	li $v0, 4			#"Please enter n >= k >= 0\n"
+	syscall				#to console
+
+	j main				#run main label
+
+do:	li $v0, 10			#exit from program
+	syscall
+
+combination:				#subprogram
+		
+	li $t0, 1			#$t0 = 1
+	sw $t0, i			#i = 1
+
+	li $t1, 1			#$t1 = 1
+	sw $t1, factorial_n		#factorial_n = 1
+loop:
+	bgt $t0, $a1, exit		#if(i>n) go to exit
+					#code below will exetute while i <= n
+	mul $t1, $t1, $t0		#factorial_n *= i
+	sw $t1, factorial_n			
+	
+	add $t0, $t0, 1			#i = i + 1
+	sw $t0, i
+
+	j loop				#jump to loop label
+exit:
+	li $t0,1			#$t0 = 1
+	sw $t0,i			#i = 1
+
+	li $t1,1			#$t1 = 1
+	sw $t1,factorial_k		#factorial_k = 1
+loop1:	
+	bgt $t0,$a2,exit1		#if(i>k) go to exit
+					#code below will exetute while i <= k
+	mul $t1,$t1,$t0			#factorial_k *= i
+	sw $t1,factorial_k
+
+	add $t0,$t0,1			#i = i + 1
+	sw $t0,i
+
+	j loop1				#jump to loop1 label
+exit1:
+	li $t0,1			#$t0 = 1
+	sw $t0,i			#i = 1
+
+	li $t1, 1			#$t1 = 1
+	sw $t1,factorial_n_k		#factorial_n_k = 1
+
+	sub $a1,$a1,$a2			#$a1 = $a1 - $a2 ($a1 = n - k)
+loop2:
+	bgt $t0,$a1,exit2		#if(i>n-k) go to exit
+					#code below will exetute while i <= n-k
+	mul $t1,$t1,$t0			#factorial_n_k *= i
+	sw $t1,factorial_n_k
+	
+	add $t0,$t0,1			#i = i + 1
+	sw $t0,i
+	
+	j loop2				#jump to loop2 label
+exit2:
+	lw $t0,factorial_n		#load factorial_n to $t0
+	lw $t1,factorial_k		#load factorial_k to $t1
+	lw $t2,factorial_n_k		#load factorial_n_k to $t2
+	
+	mul $t1,$t1,$t2			#$t1 = factorial_k * factorial_n_k
+	div $t0,$t0,$t1			#$t0 = factorial_n / $t1
+
+	move $v0,$t0			#$v0 = $t0($v0 = actorial_n / factorial_k * factorial_n_k)
+	jr $ra				#return result
+
+	.data
+i:	.word 0
+factorial_n:.word 0			#store n!
+factorial_k:.word 0			#store k!
+factorial_n_k:.word 0			#store (n-k)!
+prompt:	.asciiz "Enter number of objects in the set (n): "
+prompt1:.asciiz "Enter number to be chosen (k): "
+prompt2:.asciiz "Please enter n >= k >= 0\n"
+prompt3:.asciiz "C("
+prompt4:.asciiz " , "
+prompt5:.asciiz ") = "
